@@ -1,0 +1,4 @@
+
+*.MAP
+*.obj
+obj/debug/HoneycombTest.lib
