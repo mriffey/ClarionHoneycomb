@@ -134,23 +134,32 @@ cHoneycomb.AddMetrics     PROCEDURE(STRING pstrMetrics)
 !-----------------------------------------
 cHoneycomb.AddLog         PROCEDURE(STRING pstrLog)
 !-----------------------------------------
-
+strLogData STRING(5000)
  CODE
 
  IF CLIP(SELF.HoneycombAPIKey) > ' ' AND CLIP(SELF.HoneycombDataset) > ' '
     SELF.SetTimestamp()
     
+    SELF.oSTWork.SetValue(CLIP(pstrLog))
+    
+    SELF.oSTWork.Replace('"','\"')        ! escape the " inside the log data.
+    strLogData = SELF.oSTWork.GetValue()
+    
     IF SELF.oSTHoneyLog.Len() > 0
-       SELF.oSTHoneyLog.Append(',{{ "created_at": "' & CLIP(SELF.strTimestamp) & '", "log": "' & CLIP(pstrLog) & '"}' & eqHoneyCRLF)
+       SELF.oSTHoneyLog.Append(',{{ "created_at": "' & CLIP(SELF.strTimestamp) & '", "log": "' & CLIP(strLogData) & '"}' & eqHoneyCRLF)
     ELSE
-       SELF.oSTHoneyLog.Append('{{ "created_at": "' & CLIP(SELF.strTimestamp) & '", "log": "' & CLIP(pstrLog) & '"}' & eqHoneyCRLF)
+       SELF.oSTHoneyLog.Append('{{ "created_at": "' & CLIP(SELF.strTimestamp) & '", "log": "' & CLIP(strLogData) & '"}' & eqHoneyCRLF)
     END 
+    
+    SELF.oSTHoneyLog.Trace('cHoneycomb.AddLog: log=' & CLIP(pstrLog) )
+    SELF.oSTHoneyLog.Trace('cHoneycomb.AddLog: loglen=' & SELF.oSTHoneyLog.Len() & ' LogValue=' & CLIP(SELF.oSTHoneyLog.GetValue()) )
+    
     
     !SELF.oSTHoneyLog.Trace('input=' & CLIP(pstrLog))
     !SELF.oSTHoneyLog.Trace(CLIP(SELF.oSTHoneyLog.GetValue()))
         
  ELSE
-    SELF.oSTHoneyLog.Trace('cHoneycomb.AddLog: no key (' & CLIP(SELF.HoneycombAPIKey) & ') or dataset (' & CLIP(SELF.HoneycombDataset) & ')' )
+    SELF.oSTHoneyLog.Trace('cHoneycomb.AddLog: no key (' & CLIP(SELF.HoneycombAPIKey) & ') or dataset (' & CLIP(SELF.HoneycombDataset) & ') log=' & CLIP(pstrLog) )
  END 
  
  SELF.CheckFlush() 
@@ -172,6 +181,7 @@ strSavePath          STRING(255)
      SELF.oSTHoneyLog.Trace(']')
      
      SELF.oSTHoneyLog.Replace('\','\\')
+     SELF.oSTHoneyLog.Replace('\\"','\"')   ! restore the escapes for "  
      
      SELF.oSTHoneyOut.SetValue('{{"logs":[' & CLIP(SELF.oSTHoneyLog.GetValue()) & ']}')
      csTempPath = cHoneycombInternal_GetTempPath()
@@ -217,6 +227,7 @@ cHoneycomb.Construct  PROCEDURE()
  SELF.oSTHoneyMetrics  &= NEW(StringTheory)
  SELF.oSTHoneyHeading  &= NEW(StringTheory)
  SELF.oSTHoneyOut      &= NEW(StringTheory)
+ SELF.oSTWork          &= NEW(StringTheory)
  
  SELF.intLastFlushTime = CLOCK() 
  SELF.intFlushInterval = 30 ! default flush
@@ -229,8 +240,14 @@ cHoneycomb.Destruct   PROCEDURE()
 !----------------------------------------------------------------------------------------------------------------
  CODE
 
- SELF.Flush()
+ SELF.intRC = SELF.Flush()
 
+ IF SELF.oSTWork &= NULL
+ ELSE
+    DISPOSE(SELF.oSTWork)
+    SELF.oSTWork &= NULL
+ END 
+ 
  IF SELF.oSTHoneyOut &= NULL
  ELSE
     DISPOSE(SELF.oSTHoneyOut)

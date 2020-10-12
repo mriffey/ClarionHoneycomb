@@ -27,6 +27,7 @@ oSTHoneyHeading                   &StringTheory  ! used to manage headings
 oSTHoneyLog                       &StringTheory  ! used to build incoming log of event data
 oSTHoneyMetrics                   &StringTheory  ! used to write logged data to file for Honey
 oSTHoneyOut                       &StringTheory  ! used to create output file
+oSTWork                           &StringTheory  ! because you can never have too many StringTheorys - and for some temp work:)
 
 
   
