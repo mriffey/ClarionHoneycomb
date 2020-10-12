@@ -171,6 +171,8 @@ strSavePath          STRING(255)
      SELF.oSTHoneyLog.Trace(CLIP(SELF.oSTHoneyLog.GetValue()))
      SELF.oSTHoneyLog.Trace(']')
      
+     SELF.oSTHoneyLog.Replace('\','\\')
+     
      SELF.oSTHoneyOut.SetValue('{{"logs":[' & CLIP(SELF.oSTHoneyLog.GetValue()) & ']}')
      csTempPath = cHoneycombInternal_GetTempPath()
      strSavePath = CLIP(csTempPath) & 'Honeylog-' & FORMAT(TODAY(),@D12) & '-' & FORMAT(CLOCK(),@T05) & '.json'
@@ -180,7 +182,7 @@ strSavePath          STRING(255)
   END 
   ! push metrics data to honeycomb
   
-  RUN('cmd /c python ./HoneyLog.py --logfile "' & CLIP(strSavePath) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset))
+  RUN('cmd /c python ./HoneyLog.py --logfile "' & CLIP(strSavePath) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset) & '"')
     
   SELF.intLastFlushTime = CLOCK()  
 
@@ -217,7 +219,7 @@ cHoneycomb.Construct  PROCEDURE()
  SELF.oSTHoneyOut      &= NEW(StringTheory)
  
  SELF.intLastFlushTime = CLOCK() 
- SELF.intFlushInterval = 5 ! default flush
+ SELF.intFlushInterval = 30 ! default flush
       
  RETURN
 
