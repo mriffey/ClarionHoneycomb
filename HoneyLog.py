@@ -8,10 +8,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--apikey', type=str)
 parser.add_argument('--dataset', type=str)
 parser.add_argument('--logfile', type=str)
-parser.add_argument('--timestamp', type=str)
 
 args = parser.parse_args()
-libhoney.init(writekey=args.apikey, dataset=args.dataset, debug=True)
+libhoney.init(writekey=args.apikey, dataset=args.dataset, debug=False)
 honeyevent = libhoney.new_event()
 
 with open(args.logfile) as json_file:
