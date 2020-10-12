@@ -1,10 +1,10 @@
         OMIT('_EndOfInclude_',_IFDef_cHoneycomb_)
 _IFDef_cHoneycomb_          EQUATE(1)
 
-   INCLUDE('StringTheory.inc')
+   INCLUDE('StringTheory.inc'),ONCE
    
-Time:Seconds EQUATE(100) 
-eqCRLF       EQUATE('<13,10>')
+eqHoneyTime:Seconds EQUATE(100) 
+eqHoneyCRLF         EQUATE('<13,10>')
  
                           
 !--------------------------------------------------------------------------------

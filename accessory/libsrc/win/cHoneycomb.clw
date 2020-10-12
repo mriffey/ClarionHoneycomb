@@ -60,7 +60,7 @@ intNextFlushTime LONG
  CODE
  
  ! has it been more than SELF.intFlushInterval seconds since the last flush?
- intNextFlushTime = Time:Seconds * SELF.intFlushInterval + SELF.intLastFlushTime 
+ intNextFlushTime = eqHoneyTime:Seconds * SELF.intFlushInterval + SELF.intLastFlushTime 
  
  IF intNextFlushTime < CLOCK() 
     SELF.intRC = SELF.Flush() 
@@ -91,7 +91,10 @@ cstempdebug   CSTRING(1000)
  rTimestamp        = oFmt.ClarionToUnixDate(intToday,intClock,TRUE )
  SELF.strTimestamp = oFmt.FormatValue(rTimestamp, '@U2TM@D10-@T04')
  SELF.strTimestamp = CLIP(SELF.strTimestamp) & '.' & SUB(rTimestamp,-3,3) & 'Z'
-    
+ 
+ ! RFC3339 high precision format (e.g. YYYY-MM-DDTHH:MM:SS.mmmZ)
+ ! @U2TM@D10-@T04
+   
  RETURN 
  
  
@@ -138,9 +141,9 @@ cHoneycomb.AddLog         PROCEDURE(STRING pstrLog)
     SELF.SetTimestamp()
     
     IF SELF.oSTHoneyLog.Len() > 0
-       SELF.oSTHoneyLog.Append(',{{ "created_at": "' & CLIP(SELF.strTimestamp) & '", "log": "' & CLIP(pstrLog) & '"}' & eqCRLF)
+       SELF.oSTHoneyLog.Append(',{{ "created_at": "' & CLIP(SELF.strTimestamp) & '", "log": "' & CLIP(pstrLog) & '"}' & eqHoneyCRLF)
     ELSE
-       SELF.oSTHoneyLog.Append('{{ "created_at": "' & CLIP(SELF.strTimestamp) & '", "log": "' & CLIP(pstrLog) & '"}' & eqCRLF)
+       SELF.oSTHoneyLog.Append('{{ "created_at": "' & CLIP(SELF.strTimestamp) & '", "log": "' & CLIP(pstrLog) & '"}' & eqHoneyCRLF)
     END 
     
     !SELF.oSTHoneyLog.Trace('input=' & CLIP(pstrLog))
@@ -177,9 +180,7 @@ strSavePath          STRING(255)
   END 
   ! push metrics data to honeycomb
   
-  ! RUN('cmd /c python ./UDToHoneycomb.py --log "' & CLIP(pLog) & '" --timestamp "' & CLIP(SELF.strTimestamp) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset))
-    ! RFC3339 high precision format (e.g. YYYY-MM-DDTHH:MM:SS.mmmZ)
-    ! @U2TM@D10-@T04
+  RUN('cmd /c python ./HoneyLog.py --logfile "' & CLIP(strSavePath) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset))
     
   SELF.intLastFlushTime = CLOCK()  
 
