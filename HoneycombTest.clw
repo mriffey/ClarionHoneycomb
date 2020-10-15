@@ -21,15 +21,22 @@ oHoney   cHoneycomb
  oHoney.SetAPIKey(strAPIKey)
  oHoney.SetDataset(strDataset)
  
- oHoney.AddLog('Testlog1 ' & CLOCK() )
+ oHoney.SetHeadings('"date","time","sales"')
+ oHoney.AddMetrics('70234,' & 8 * 100 * 60 * 60 & ',123.45')
+ oHoney.AddMetrics('70235,' & 9 * 100 * 60 * 60 & ',223.45')
+ oHoney.AddMetrics('70236,' & 10 * 100 * 60 * 60 & ',323.45')
+ oHoney.AddMetrics('70237,' & 11 * 100 * 60 * 60 & ',423.45')
+ oHoney.AddMetrics('70238,' & 12 * 100 * 60 * 60 & ',523.45')
  
- oHoney.AddLog('Testlog2 ' & CLOCK() )
- 
- oHoney.AddLog('Testlog3 ' & CLOCK() )
- 
- oHoney.AddLog('Testlog4 ' & CLOCK() )
- 
- oHoney.AddLog('Testlog5 ' & CLOCK() )
+! oHoney.AddLog('Testlog1 ' & CLOCK() )
+! 
+! oHoney.AddLog('Testlog2 ' & CLOCK() )
+! 
+! oHoney.AddLog('Testlog3 ' & CLOCK() )
+! 
+! oHoney.AddLog('Testlog4 ' & CLOCK() )
+! 
+! oHoney.AddLog('Testlog5 ' & CLOCK() )
  
 ! oHoney.SetHeading('date,time,someotherfield')
 ! 
