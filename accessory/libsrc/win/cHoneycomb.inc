@@ -9,7 +9,6 @@ eqHoneyCRLF         EQUATE('<13,10>')
                           
 !--------------------------------------------------------------------------------
 cHoneycomb   CLASS(StringTheory),TYPE,THREAD,MODULE('cHoneycomb.CLW'),LINK('cHoneycomb.CLW',_ABCLinkMode_),DLL(_ABCDllMode_)
-!
 !--------------------------------------------------------------------------------
 !Properties
 !----------
@@ -20,6 +19,8 @@ HoneycombDataset                  STRING(100)
 strTimestamp                      STRING(50)
 intLastFlushTime                  LONG 
 intFlushInterval                  LONG ! Seconds 
+AutoFormatDate                    LONG 
+AutoFormatTime                    LONG 
 
 CSVHeading                        STRING(512)
 
@@ -47,7 +48,12 @@ SetDataset                        PROCEDURE(STRING pstrDataset)
 SetHeadings                       PROCEDURE(STRING pstrHeadings),LONG
 SetTimestamp                      PROCEDURE(<LONG pDate>,<LONG pTime>)
 
+SetAutoFormatDate                 PROCEDURE(LONG pAutoFormat)
+SetAutoFormatTime                 PROCEDURE(LONG pAutoFormat)
+
 Flush                             PROCEDURE(),LONG 
+FlushLog                          PROCEDURE(),LONG 
+FlushMetrics                      PROCEDURE(),LONG 
 CheckFlush                        PROCEDURE() 
 SetFlushInterval                  PROCEDURE(LONG pSecs)
 
