@@ -157,14 +157,29 @@ cHoneycomb.SetAutoFormatTime      PROCEDURE(LONG pAutoFormat)
  
  RETURN 
  
+ 
+!-----------------------------------------
+cHoneycomb.SetMergeDateAndTime               PROCEDURE(LONG pMergeDateTime) 
+!-----------------------------------------
+
+ CODE
+ 
+ IF pMergeDateTime = TRUE OR pMergeDateTime = FALSE 
+    SELF.MergeDateAndTime = pMergeDateTime
+ END 
+ 
+ RETURN 
+ 
 
 !-----------------------------------------
 cHoneycomb.AddMetrics     PROCEDURE(STRING pstrMetrics)
 !-----------------------------------------
 intLines   LONG 
 
-strWorkDate    STRING(10)
-strWorkTime    STRING(10)
+strWorkDate           STRING(10)
+strWorkTime           STRING(10)
+intDateInThisMetric   LONG 
+intTimeInThisMetric   LONG 
 
  CODE
  
@@ -178,8 +193,12 @@ strWorkTime    STRING(10)
     SELF.oSTWork.Split(',','"',,RemoveTheQuotes,ClipTheData)
     
     ! now we have data in individual queue entries in SELF.oSTWork.Lines and headings in individual queue entries in SELF.oHoneyHeadings.Lines. 
+
+    intDateInThisMetric = FALSE 
+    intTimeInThisMetric = FALSE 
     
     LOOP intLoop = 1 TO intLines 
+       !SELF.oSTHoneyHeading.Trace('before processing intloop=' & intLoop & ' datefound=' & intDateInThisMetric & ' timefound=' & intTimeInThisMetric)
        SELF.oSTWork.GetLine(intLoop)
        SELF.oSTHoneyHeading.GetLine(intLoop)
        !SELF.oSTHoneyMetrics.Trace('field ' & intLoop & ' Heading=' & CLIP(SELF.oSTHoneyHeading.lines.line) & ' data=' & CLIP(SELF.oSTWork.lines.line))
@@ -195,25 +214,33 @@ strWorkTime    STRING(10)
        ! if the heading name is date or time, format as a date/time.       
        
        IF INSTRING('date',LOWER(CLIP(SELF.oSTHoneyHeading.lines.line)),1,1) > 0
+          intDateInThisMetric = TRUE  
           IF SELF.AutoFormatDate = TRUE                                            ! the json world doesnt really like standalone dates. If no time component exists, set time to 00:00:00
              strWorkDate = FORMAT(CLIP(SELF.oSTWork.lines.line),@d10-)
-       !      SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(strWork) & '"' )
-       !   ELSE              
-       !      SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
+             SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(strWorkDate) & '"' )
+          ELSE              
+             SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
           END 
           
-       !ELSIF INSTRING('time',LOWER(CLIP(SELF.oSTHoneyHeading.lines.line)),1,1) > 0
-       !      IF SELF.AutoFormatTime = TRUE
-       !         strWork = FORMAT(CLIP(SELF.oSTWork.lines.line),@T04)
-       !         SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(strWork) & '"' )
-       !      ELSE
-       !         SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
-       !      END 
+       ELSIF INSTRING('time',LOWER(CLIP(SELF.oSTHoneyHeading.lines.line)),1,1) > 0
+             intTimeInThisMetric = TRUE 
+             IF SELF.AutoFormatTime = TRUE
+                strWorkTime = FORMAT(CLIP(SELF.oSTWork.lines.line),@T04)
+                SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(strWorkTime) & '"' )
+             ELSE
+                SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
+             END 
        ELSE
           SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
        END        
           
        IF intLoop = intLines ! ie: we're processing the last column - dont add trailing comma and do add the trailing brace.
+          IF SELF.MergeDateAndTime = TRUE 
+             IF intDateInThisMetric = TRUE AND intTimeInThisMetric = TRUE
+                SELF.oSTHoneyHeading.Trace('date and time found')
+                SELF.oSTHoneyMetrics.Append(', "DateTime": "' & CLIP(strWorkDate) & 'T' & CLIP(strWorkTime) & '.000Z"')
+             END 
+          END 
           SELF.oSTHoneyMetrics.Append('}')
        ELSE ! there's at least 1 more column so add the trailing comma. 
           SELF.oSTHoneyMetrics.Append(',' )
@@ -380,6 +407,7 @@ cHoneycomb.Construct  PROCEDURE()
  
  SELF.SetAutoFormatDate(TRUE)
  SELF.SetAutoFormatTime(TRUE)
+ SELF.SetMergeDateAndTime(TRUE) 
       
  RETURN
 

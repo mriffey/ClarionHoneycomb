@@ -21,6 +21,7 @@ intLastFlushTime                  LONG
 intFlushInterval                  LONG ! Seconds 
 AutoFormatDate                    LONG 
 AutoFormatTime                    LONG 
+MergeDateAndTime                  LONG 
 
 CSVHeading                        STRING(512)
 
@@ -50,6 +51,7 @@ SetTimestamp                      PROCEDURE(<LONG pDate>,<LONG pTime>)
 
 SetAutoFormatDate                 PROCEDURE(LONG pAutoFormat)
 SetAutoFormatTime                 PROCEDURE(LONG pAutoFormat)
+SetMergeDateAndTime               PROCEDURE(LONG pMergeDateTime)
 
 Flush                             PROCEDURE(),LONG 
 FlushLog                          PROCEDURE(),LONG 
