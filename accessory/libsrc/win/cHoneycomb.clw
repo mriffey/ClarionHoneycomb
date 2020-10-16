@@ -180,6 +180,7 @@ strWorkDate           STRING(10)
 strWorkTime           STRING(10)
 intDateInThisMetric   LONG 
 intTimeInThisMetric   LONG 
+oSTTemp               StringTheory
 
  CODE
  
@@ -211,7 +212,7 @@ intTimeInThisMetric   LONG
        END
        
        ! a numeric test would be good so numbers arent surrounded by quotes.
-       ! if the heading name is date or time, format as a date/time.       
+       ! if the heading name is date or time, it will automatically format as a date/time unless you disable that feature.
        
        IF INSTRING('date',LOWER(CLIP(SELF.oSTHoneyHeading.lines.line)),1,1) > 0
           intDateInThisMetric = TRUE  
@@ -231,7 +232,12 @@ intTimeInThisMetric   LONG
                 SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
              END 
        ELSE
-          SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
+          oSTTemp.SetValue(CLIP(SELF.oSTWork.lines.line))
+          IF oSTTemp.IsAll('01233456789.-') = TRUE 
+             SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": ' & CLIP(SELF.oSTWork.lines.line) & '' )
+          ELSE 
+             SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
+          END 
        END        
           
        IF intLoop = intLines ! ie: we're processing the last column - dont add trailing comma and do add the trailing brace.
@@ -249,14 +255,12 @@ intTimeInThisMetric   LONG
     END 
     
     SELF.oSTHoneyMetrics.Append(eqHoneyCRLF)
-    
-    !SELF.oSTHoneyMetrics.Trace(CLIP(SELF.oSTHoneyMetrics.GetValue()))
-    
+        
  ELSE
     SELF.oSTHoneyLog.Trace('cHoneycomb.AddMetrics: PROBLEM: no apikey (' & CLIP(SELF.HoneycombAPIKey) & '), or dataset (' & CLIP(SELF.HoneycombDataset) & '), or headings (count=' & intLines & ')')
  END 
  
- !SELF.CheckFlush() 
+ SELF.CheckFlush() 
  
  RETURN
  
