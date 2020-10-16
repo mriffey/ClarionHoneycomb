@@ -232,6 +232,7 @@ oSTTemp               StringTheory
                 SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
              END 
        ELSE
+          ! if the data is all numeric, let's omit the quotes from the JSON.
           oSTTemp.SetValue(CLIP(SELF.oSTWork.lines.line))
           IF oSTTemp.IsAll('01233456789.-') = TRUE 
              SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": ' & CLIP(SELF.oSTWork.lines.line) & '' )
