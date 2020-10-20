@@ -15,7 +15,7 @@ oHoney   cHoneycomb
 
  CODE
 
- strAPIKey   = COMMAND('APIKey')   ! get this some other way if you like - not coded here to avoid putting API keys i n pub
+ strAPIKey   = COMMAND('APIKey')   ! get this some other way if you like - not coded here to avoid putting API keys in a public repo. 
  strDataset  = COMMAND('Dataset')
  
  oHoney.SetAPIKey(strAPIKey)

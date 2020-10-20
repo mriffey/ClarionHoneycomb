@@ -338,7 +338,7 @@ strSavePath          STRING(255)
   END 
   ! push metrics data to honeycomb
   
-  RUN('cmd /c python ./HoneyMetrics.py --logfile "' & CLIP(strSavePath) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset) & '"') ! no need to wait, the py script throttles itself. 
+  RUN('cmd /c python ./HoneyMetrics.py --logfile "' & CLIP(strSavePath) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset) & '-metrics"') ! no need to wait, the py script throttles itself. 
     
   SELF.intLastFlushTime = CLOCK()  
 
