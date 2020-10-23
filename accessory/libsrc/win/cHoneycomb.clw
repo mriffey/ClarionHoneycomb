@@ -128,7 +128,7 @@ cHoneycomb.SetHeadings      PROCEDURE(STRING pstrHeadings)!,LONG
     SELF.intRC = FALSE 
  END 
  
- SELF.CheckFlush() 
+ !SELF.CheckFlush() 
  
  RETURN SELF.intRC 
  
@@ -324,21 +324,15 @@ strSavePath          STRING(255)
   
   ! push log data to honeycomb
 
-  IF CLIP(SELF.oSTHoneyMetrics.GetValue()) > ' '
-     
-     !SELF.oSTHoneyMetrics.Replace('\','\\')
-     !SELF.oSTHoneyMetrics.Replace('\\"','\"')   ! restore the escapes for "  
-     
+  IF CLIP(SELF.oSTHoneyMetrics.GetValue()) > ' '     
      SELF.oSTHoneyOut.SetValue('{{"metrics":[' & CLIP(SELF.oSTHoneyMetrics.GetValue()) & ']}')
      csTempPath = cHoneycombInternal_GetTempPath()
      strSavePath = CLIP(csTempPath) & 'HoneyMetrics-' & FORMAT(TODAY(),@D12) & '-' & FORMAT(CLOCK(),@T05) & '.json'
      SELF.oSTHoneyMetrics.Trace('Savepath=' & CLIP(strSavePath))
      SELF.oSTHoneyOut.SaveFile(strSavePath)
      SELF.oSTHoneyMetrics.SetValue('')
+     RUN('cmd /c python ./HoneyMetrics.py --logfile "' & CLIP(strSavePath) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset) & '-metrics"') ! no need to wait, the py script throttles itself. 
   END 
-  ! push metrics data to honeycomb
-  
-  RUN('cmd /c python ./HoneyMetrics.py --logfile "' & CLIP(strSavePath) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset) & '-metrics"') ! no need to wait, the py script throttles itself. 
     
   SELF.intLastFlushTime = CLOCK()  
 
@@ -368,10 +362,8 @@ strSavePath          STRING(255)
      SELF.oSTHoneyLog.Trace('Savepath=' & CLIP(strSavePath))
      SELF.oSTHoneyOut.SaveFile(strSavePath)
      SELF.oSTHoneyLog.SetValue('')
-  END 
-  ! push metrics data to honeycomb
-  
-  RUN('cmd /c python ./HoneyLog.py --logfile "' & CLIP(strSavePath) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset) & '"') ! no need to wait, the py script throttles itself. 
+     RUN('cmd /c python ./HoneyLog.py --logfile "' & CLIP(strSavePath) & '" --apikey "' & CLIP(SELF.HoneycombAPIKey) & '" --dataset "' & CLIP(SELF.HoneycombDataset) & '"') ! no need to wait, the py script throttles itself. 
+  END   
     
   SELF.intLastFlushTime = CLOCK()  
 
