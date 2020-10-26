@@ -28,28 +28,16 @@ oHoney   cHoneycomb
  oHoney.AddMetrics('70237,' & 11 * 100 * 60 * 60 & ',423.45')
  oHoney.AddMetrics('70238,' & 12 * 100 * 60 * 60 & ',523.45')
  
-! oHoney.AddLog('Testlog1 ' & CLOCK() )
-! 
-! oHoney.AddLog('Testlog2 ' & CLOCK() )
-! 
-! oHoney.AddLog('Testlog3 ' & CLOCK() )
-! 
-! oHoney.AddLog('Testlog4 ' & CLOCK() )
-! 
-! oHoney.AddLog('Testlog5 ' & CLOCK() )
+ oHoney.AddLog('Testlog1 Arnold' & CLOCK() )
  
-! oHoney.SetHeading('date,time,someotherfield')
-! 
-! LOOP 10 TIMES
-! 
-!    oHoney.WriteLog('Someday ' & FORMAT(TODAY(),@D10-) & ' at sometime oclock ' & FORMAT(CLOCK(),@T05))
-!    
-!    LOOP 100 TIMES 
-!       intRandoData = RANDOM(0,100000)
-!       oHoney.SendMetrics()
-!    END 
-!    
-! END
+ oHoney.AddLog('Testlog2 John' & CLOCK() )
+ 
+ oHoney.AddLog('Testlog3 Bruce' & CLOCK() )
+ 
+ oHoney.AddLog('Testlog4 MarkG' & CLOCK() )
+ 
+ oHoney.AddLog('Testlog5 Where is the Cajun man?' & CLOCK() )
+
  
  RETURN 
  

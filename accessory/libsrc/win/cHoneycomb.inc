@@ -23,6 +23,9 @@ AutoFormatDate                    LONG
 AutoFormatTime                    LONG 
 MergeDateAndTime                  LONG 
 
+intZeroMetricsSuppression         LONG ! true/false
+intZeroMetricsReportInterval      LONG ! seconds
+
 CSVHeading                        STRING(512)
 
 oSTHoneyHeading                   &StringTheory  ! used to manage headings

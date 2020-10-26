@@ -68,7 +68,7 @@ intNextFlushTime LONG
  ! has it been more than SELF.intFlushInterval seconds since the last flush?
  intNextFlushTime = eqHoneyTime:Seconds * SELF.intFlushInterval + SELF.intLastFlushTime 
  
- IF intNextFlushTime < CLOCK() 
+ IF intNextFlushTime < CLOCK() OR CLOCK() < SELF.intLastFlushTime ! we passed a flush interval, or rolled across midnight
     IF SELF.oSTHoneyLog.Len() > 0 OR SELF.oSTHoneyMetrics.Len() > 0
        SELF.intRC = SELF.Flush() 
     END 
@@ -117,7 +117,6 @@ cHoneycomb.SetHeadings      PROCEDURE(STRING pstrHeadings)!,LONG
  CODE
  
  ! limited editing done by virtue of the ST.SPLIT. 
- FREE(SELF.oSTHoneyHeading)
  SELF.oSTHoneyHeading.SetValue(pstrHeadings) 
  SELF.oSTHoneyHeading.Split(',','"',,RemoveTheQuotes,ClipTheData)
 
@@ -169,7 +168,7 @@ cHoneycomb.SetMergeDateAndTime               PROCEDURE(LONG pMergeDateTime)
  END 
  
  RETURN 
- 
+
 
 !-----------------------------------------
 cHoneycomb.AddMetrics     PROCEDURE(STRING pstrMetrics)
@@ -196,7 +195,32 @@ oSTTemp               StringTheory
     ! now we have data in individual queue entries in SELF.oSTWork.Lines and headings in individual queue entries in SELF.oHoneyHeadings.Lines. 
 
     intDateInThisMetric = FALSE 
-    intTimeInThisMetric = FALSE 
+    intTimeInThisMetric = FALSE     
+
+! WIP - needs to be smarter than coded so far. 
+! ideally, logs the first set of zero metrics, suppresses 2nd-nth for x seconds, then logs again.     
+!    IF SELF.intZeroMetricsSuppression = TRUE      ! metrics zero suppression prevents a ton of lines with 0 in them. Not terribly useful in most cases. 
+!       IF SELF.intZeroMetricsReportInterval > 0   ! buuuuut we want to send even zero metrics occasionally, just to prove we're alive. Value is in seconds
+!          IF SELF.intLastZeroMetricsSend + SELF.intZeroMetricsReportInterval * Time:Seconds < CLOCK() OR SELF.intLastZeroMetricsSend = 0 ! its time to send
+!             intZeroLines = 0
+!             LOOP intLoop = 1 TO intLines 
+!                SELF.oSTWork.GetLine(intLoop)                 
+!                oSTTemp.SetValue(CLIP(SELF.oSTWork.lines.line))
+!                IF oSTTemp.IsAll('01233456789,.+-') = TRUE ! if the data is numeric
+!                   IF oSTTemp.IsAll('0.,+-') = TRUE 
+!                      intZeroLines += 1
+!                   END                   
+!                ELSE
+!                   intZeroLines += 1  ! treat alpha data as zero.
+!                END 
+!             END   
+!             IF intZeroLines = intLines ! its all zeros
+!                RETURN
+!             END 
+!          END 
+!       END
+!    END 
+
     
     LOOP intLoop = 1 TO intLines 
        !SELF.oSTHoneyHeading.Trace('before processing intloop=' & intLoop & ' datefound=' & intDateInThisMetric & ' timefound=' & intTimeInThisMetric)
@@ -234,7 +258,7 @@ oSTTemp               StringTheory
        ELSE
           ! if the data is all numeric, let's omit the quotes from the JSON.
           oSTTemp.SetValue(CLIP(SELF.oSTWork.lines.line))
-          IF oSTTemp.IsAll('01233456789.-') = TRUE 
+          IF oSTTemp.IsAll('01233456789,.+-') = TRUE 
              SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": ' & CLIP(SELF.oSTWork.lines.line) & '' )
           ELSE 
              SELF.oSTHoneyMetrics.Append('"' & CLIP(SELF.oSTHoneyHeading.lines.line) & '": "' & CLIP(SELF.oSTWork.lines.line) & '"' )
@@ -244,8 +268,8 @@ oSTTemp               StringTheory
        IF intLoop = intLines ! ie: we're processing the last column - dont add trailing comma and do add the trailing brace.
           IF SELF.MergeDateAndTime = TRUE 
              IF intDateInThisMetric = TRUE AND intTimeInThisMetric = TRUE
-                SELF.oSTHoneyHeading.Trace('date and time found')
-                SELF.oSTHoneyMetrics.Append(', "DateTime": "' & CLIP(strWorkDate) & 'T' & CLIP(strWorkTime) & '.000Z"')
+                !SELF.oSTHoneyHeading.Trace('date and time found')
+                SELF.oSTHoneyMetrics.Append(', "DateTime": "' & CLIP(strWorkDate) & 'T' & CLIP(strWorkTime) & '.000Z"')   
              END 
           END 
           SELF.oSTHoneyMetrics.Append('}')
@@ -299,6 +323,7 @@ strLogData STRING(5000)
  SELF.CheckFlush() 
  
  RETURN 
+ 
  
 !----------------------------------------------------------------------------------------------------------------
 cHoneycomb.Flush          PROCEDURE()!,LONG 
